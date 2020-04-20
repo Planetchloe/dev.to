@@ -8,7 +8,7 @@ module Search
           "reactable.body_text^2",
           "reactable.title^6",
           "reactable.user.name",
-          "reactable.user.username",
+          "reactable.user.username"
         ]
       }.freeze
 

@@ -4,13 +4,12 @@ import { PropTypes } from 'preact-compat';
 
 export const ItemListItem = ({ item, children }) => {
   const adaptedItem = {
-    path: item.article_path || item.searchable_reactable_path,
-    title: item.article_title || item.searchable_reactable_title,
-    user: item.article_user || item.reactable_user,
-    publishedDate: item.reactable_published_date,
-    visitedDate: item.readable_visited_at,
-    readingTime: item.article_reading_time || item.reading_time,
-    tags: item.article_tags || item.reactable_tags,
+    path: item.article_path || item.reactable.path,
+    title: item.article_title || item.reactable.title,
+    user: item.article_user || item.reactable.user,
+    publishedDate: item.reactable.published_date_string,
+    readingTime: item.article_reading_time || item.reactable.reading_time,
+    tags: item.article_tags || item.reactable.tags,
   };
 
   // update readingTime to 1 min if the reading time is less than 1 min
@@ -24,9 +23,7 @@ export const ItemListItem = ({ item, children }) => {
           <a className="item-user" href={`/${adaptedItem.user.username}`}>
             <img src={adaptedItem.user.profile_image_90} alt="Profile Pic" />
             {`${adaptedItem.user.name}・`}
-            {adaptedItem.visitedDate
-              ? `visited on ${adaptedItem.visitedDate}・`
-              : `${adaptedItem.publishedDate}・`}
+            {`${adaptedItem.publishedDate}・`}
             {`${adaptedItem.readingTime} min read・`}
           </a>
 
@@ -34,7 +31,7 @@ export const ItemListItem = ({ item, children }) => {
             <span className="item-tags">
               {adaptedItem.tags.map(tag => (
                 <a className="item-tag" href={`/t/${tag}`}>
-                  {`#${tag}`}
+                  {`#${tag.name}`}
                 </a>
               ))}
             </span>
@@ -63,8 +60,8 @@ const historyItemPropTypes = PropTypes.shape({
 });
 
 const readingListItemPropTypes = PropTypes.shape({
-  searchable_reactable_path: PropTypes.string.isRequired,
-  searchable_reactable_title: PropTypes.string.isRequired,
+  reactable_path: PropTypes.string.isRequired,
+  reactable_title: PropTypes.string.isRequired,
   reactable_user: PropTypes.shape({
     username: PropTypes.string.isRequired,
     profile_image_90: PropTypes.string.isRequired,

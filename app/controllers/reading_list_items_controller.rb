@@ -27,7 +27,7 @@ class ReadingListItemsController < ApplicationController
     @view = if params[:view] == "archive"
               "archived"
             else
-              "valid"
+              "valid,confirmed"
             end
   end
 end

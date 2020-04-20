@@ -1,5 +1,5 @@
 // Shared behavior between the reading list and history pages
-import setupAlgoliaIndex from '../src/utils/algolia';
+import { fetchSearch } from '../src/utils/search';
 
 // Provides the initial state for the component
 export function defaultState(options) {
@@ -66,18 +66,17 @@ export function performInitialSearch({
 }) {
   const component = this;
   const { hitsPerPage } = component.state;
+  const dataHash = { page: 0, per_page: hitsPerPage };
 
-  const index = setupAlgoliaIndex({ containerId, indexName });
-
-  index.search('', searchOptions).then(result => {
+  const responsePromise = fetchSearch('reactions', dataHash);
+  return responsePromise.then(response => {
+    const reactions = response.result;
     component.setState({
-      items: result.hits,
-      totalCount: result.nbHits,
-      index, // set the index in the component state, to be retrieved later
+      page: 0,
+      items: reactions,
       itemsLoaded: true,
-      // show the button if the number of total results is greater
-      // than the number of results for the current page
-      showLoadMoreButton: result.nbHits > hitsPerPage,
+      totalCount: response.total,
+      showLoadMoreButton: hitsPerPage < response.total,
     });
   });
 }
@@ -90,28 +89,32 @@ export function search(query, { page, tags, statusView }) {
   // we check `undefined` because page can be 0
   const newPage = page === undefined ? component.state.page : page;
 
-  const { index, hitsPerPage, items } = component.state;
+  const { hitsPerPage, items } = component.state;
+  const dataHash = {
+    search_fields: query,
+    page: newPage,
+    per_page: hitsPerPage,
+  };
 
-  const filters = { hitsPerPage, page: newPage };
   if (tags && tags.length > 0) {
-    filters.tagFilters = tags;
+    dataHash.tag_names = tags;
   }
 
   if (statusView) {
-    filters.filters = `status:${statusView}`;
+    dataHash.status = statusView.split(",");
   }
-  index.search(query, filters).then(result => {
-    // append new items at the end
-    const allItems =
-      page === undefined ? result.hits : [...items, ...result.hits];
+
+debugger
+
+  const responsePromise = fetchSearch('reactions', dataHash);
+  return responsePromise.then(response => {
+    const reactions = response.result;
     component.setState({
       query,
       page: newPage,
-      items: result.hits,
-      totalCount: allItems.length,
-      // show the button if the number of items is lower than the number
-      // of available results
-      showLoadMoreButton: allItems.length < result.nbHits,
+      items: reactions,
+      totalCount: response.total,
+      showLoadMoreButton: reactions.length < response.total,
     });
   });
 }
