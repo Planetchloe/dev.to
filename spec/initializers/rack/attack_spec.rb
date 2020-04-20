@@ -60,4 +60,23 @@ describe Rack::Attack, type: :request, throttle: true do
       end
     end
   end
+
+  describe "site_hits" do
+    it "throttles all site requests" do
+      user = create(:user)
+      allow(User).to receive(:find_by).and_return(user)
+
+      Timecop.freeze do
+        valid_responses = Array.new(10).map do
+          get "/#{rand(100)}", headers: { "HTTP_FASTLY_CLIENT_IP" => "5.6.7.8" }
+        end
+        throttled_response = get "/#{rand(100)}", headers: { "HTTP_FASTLY_CLIENT_IP" => "5.6.7.8" }
+        new_ip_response = get "/#{rand(100)}", headers: { "HTTP_FASTLY_CLIENT_IP" => "1.1.1.1" }
+
+        valid_responses.each { |r| expect(r).not_to eq(429) }
+        expect(throttled_response).to eq(429)
+        expect(new_ip_response).not_to eq(429)
+      end
+    end
+  end
 end
