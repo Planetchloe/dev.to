@@ -53,4 +53,14 @@ describe ArticlesHelper do
       it { is_expected.to include('height="18" width="18"') }
     end
   end
+
+  describe "#formated_date" do
+    it "correctly formats the date when present" do
+      expect(helper.formated_date(Time.now.to_i)).to match(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z/)
+    end
+
+    it "returns nil if there is no timestamp" do
+      expect(helper.formated_date(nil)).to be nil
+    end
+  end
 end
